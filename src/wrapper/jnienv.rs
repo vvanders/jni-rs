@@ -25,6 +25,7 @@ use objects::JMethodID;
 use objects::JStaticMethodID;
 use objects::JFieldID;
 use objects::GlobalRef;
+use objects::LocalRef;
 
 use descriptors::Desc;
 
@@ -64,6 +65,11 @@ impl<'a> From<*mut sys::JNIEnv> for JNIEnv<'a> {
 }
 
 impl<'a> JNIEnv<'a> {
+    /// Get internal JNI pointer
+    pub fn inner(&self) -> *mut sys::JNIEnv {
+        self.internal
+    }
+
     /// Get the java version that we're being executed from. This is encoded and
     /// will need to be checked against constants from the sys module.
     ///
@@ -221,13 +227,13 @@ impl<'a> JNIEnv<'a> {
 
     // Not public yet - not sure what the GC behavior is. Needs more research
     #[allow(dead_code)]
-    fn new_local_ref(&self, obj: JObject) -> Result<JObject> {
+    pub fn new_local_ref(&self, obj: JObject) -> Result<JObject> {
         non_null!(obj, "new_local_ref obj argument");
         Ok(jni_call!(self.internal, NewLocalRef, obj.into_inner()))
     }
 
     #[allow(dead_code)]
-    fn delete_local_ref(&self, obj: JObject) -> Result<()> {
+    pub fn delete_local_ref(&self, obj: JObject) -> Result<()> {
         non_null!(obj, "delete_local_ref obj argument");
         Ok(unsafe {
             jni_unchecked!(self.internal, DeleteLocalRef, obj.into_inner());
@@ -639,10 +645,11 @@ impl<'a> JNIEnv<'a> {
             return Err(ErrorKind::InvalidArgList.into());
         }
 
-        let class = self.get_object_class(obj)?;
+        let class = LocalRef::from_env(&self, self.get_object_class(obj)?);
+        let method: JMethodID<'a> = (*class.as_ref(), name, sig).lookup(self)?;
 
         unsafe {
-            self.call_method_unsafe(obj, (class, name, sig), parsed.ret, args)
+            self.call_method_unsafe(obj, method, parsed.ret, args)
         }
     }
 

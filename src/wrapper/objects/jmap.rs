@@ -6,6 +6,8 @@ use objects::JObject;
 use objects::JClass;
 use objects::JMethodID;
 
+use jni_sys::jobject;
+
 use signature::JavaType;
 use signature::Primitive;
 

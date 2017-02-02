@@ -3,6 +3,8 @@ use std::convert::From;
 use errors::*;
 
 use sys::{jobject, JNIEnv};
+use wrapper::objects::JObject;
+use wrapper;
 
 /// A global JVM reference. These are "pinned" by the garbage collector and are
 /// guaranteed to not get collected until released. Thus, this is allowed to
@@ -21,6 +23,18 @@ impl GlobalRef {
             obj: obj,
             env: env,
         }
+    }
+
+    /// Creates a new global ref from an object
+    pub unsafe fn from(env: &wrapper::JNIEnv, object: &JObject) -> Result<GlobalRef> {
+        let obj: JObject = jni_call!(env.inner(), NewGlobalRef, object.into_inner());
+
+        Ok(GlobalRef::new(env.inner(), obj.into_inner()))
+    }
+
+    /// accessor for global ref
+    pub fn inner(&mut self) -> JObject {
+        JObject::from(self.obj)
     }
 
     fn drop_ref(&mut self) -> Result<()> {

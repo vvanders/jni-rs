@@ -14,6 +14,9 @@ pub use self::jfieldid::*;
 mod jobject;
 pub use self::jobject::*;
 
+mod jarray;
+pub use self::jarray::*;
+
 mod jthrowable;
 pub use self::jthrowable::*;
 
@@ -29,3 +32,6 @@ pub use self::jmap::*;
 // For when you want to store a reference to a java object
 mod global_ref;
 pub use self::global_ref::*;
+
+mod local_ref;
+pub use self::local_ref::*;

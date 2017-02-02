@@ -20,6 +20,17 @@ pub struct JNIStr {
     internal: ffi::CStr,
 }
 
+impl ::std::fmt::Display for JNIString {
+    fn fmt(&self, formatter: &mut ::std::fmt::Formatter) -> Result<(), ::std::fmt::Error> {
+        match self.internal.to_str() {
+            Ok(s) => formatter.write_str(s),
+            Err(_) => formatter.write_str("Error")
+        };
+
+        Ok(())
+    }
+}
+
 impl ::std::ops::Deref for JNIString {
     type Target = JNIStr;
 

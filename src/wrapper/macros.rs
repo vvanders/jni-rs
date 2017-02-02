@@ -20,15 +20,15 @@ macro_rules! deref {
 
 macro_rules! jni_method {
     ( $jnienv:expr, $name:tt ) => ({
-        trace!("looking up jni method {}", stringify!($name));
+        //trace!("looking up jni method {}", stringify!($name));
         let env = $jnienv;
         match deref!(deref!(env, "JNIEnv"), "*JNIEnv").$name {
             Some(meth) => {
-                trace!("found jni method");
+                //trace!("found jni method");
                 meth
             },
             None => {
-                trace!("jnienv method not defined, returning error");
+                //trace!("jnienv method not defined, returning error");
                 return Err($crate::errors::Error::from(
                     $crate::errors::ErrorKind::JNIEnvMethodNotFound(
                         stringify!($name))).into())},
@@ -38,23 +38,23 @@ macro_rules! jni_method {
 
 macro_rules! check_exception {
     ( $jnienv:expr ) => {
-        trace!("checking for exception");
+        //trace!("checking for exception");
         #[allow(unused_unsafe)]
         let check = unsafe {
             jni_unchecked!($jnienv, ExceptionCheck)
         } == $crate::sys::JNI_TRUE;
         if check {
-            trace!("exception found, returning error");
+            //trace!("exception found, returning error");
             return Err($crate::errors::Error::from(
                 $crate::errors::ErrorKind::JavaException).into());
         }
-        trace!("no exception found");
+        //trace!("no exception found");
     }
 }
 
 macro_rules! jni_unchecked {
     ( $jnienv:expr, $name:tt $(, $args:expr )* ) => ({
-        trace!("calling unchecked jni method: {}", stringify!($name));
+        //trace!("calling unchecked jni method: {}", stringify!($name));
         let res = jni_method!($jnienv, $name)($jnienv, $($args),*);
         res
     })
@@ -62,13 +62,13 @@ macro_rules! jni_unchecked {
 
 macro_rules! jni_call {
     ( $jnienv:expr, $name:tt $(, $args:expr )* ) => ({
-        trace!("calling checked jni method: {}", stringify!($name));
+        //trace!("calling checked jni method: {}", stringify!($name));
         #[allow(unused_unsafe)]
         unsafe {
-            trace!("entering unsafe");
+            //trace!("entering unsafe");
             let res = jni_method!($jnienv, $name)($jnienv, $($args),*);
             check_exception!($jnienv);
-            trace!("exiting unsafe");
+            //trace!("exiting unsafe");
             non_null!(res, concat!(stringify!($name), " result")).into()
         }
     })

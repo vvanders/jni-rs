@@ -22,6 +22,12 @@ impl<'a> ::std::ops::Deref for JString<'a> {
     }
 }
 
+impl<'a> AsRef<jobject> for JString<'a> {
+    fn as_ref(&self) -> &jobject {
+        self.0.as_ref()
+    }
+}
+
 impl<'a> From<JString<'a>> for JObject<'a> {
     fn from(other: JString) -> JObject {
         other.0

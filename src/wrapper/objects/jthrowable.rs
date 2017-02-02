@@ -21,6 +21,12 @@ impl<'a> ::std::ops::Deref for JThrowable<'a> {
     }
 }
 
+impl<'a> AsRef<jobject> for JThrowable<'a> {
+    fn as_ref(&self) -> &jobject {
+        self.0.as_ref()
+    }
+}
+
 impl<'a> From<JThrowable<'a>> for JObject<'a> {
     fn from(other: JThrowable) -> JObject {
         other.0
